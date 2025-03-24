@@ -12,7 +12,7 @@ This lab uses **VS Code** as the development environment and sets up a **conda e
     ```
 2. Install packages from `environment.yml`:
     ```bash
-    conda env update --file environment.yml --prune
+    conda env update --file environment.yml 
     ```
 ##  Project Structure
 mlops/
