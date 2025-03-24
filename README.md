@@ -1,8 +1,8 @@
 ## Overview
-#This repository contains the setup scaffolding for course labs and a class project related to MLOps. It demonstrates best practices for structuring a development environment. 
+This repository contains the setup scaffolding for course labs and a class project related to MLOps. It demonstrates best practices for structuring a development environment. 
 
 ## Environment Setup
-#This lab uses **VS Code** as the development environment and sets up a **conda environment** with dependencies specified in `environment.yml`.
+This lab uses **VS Code** as the development environment and sets up a **conda environment** with dependencies specified in `environment.yml`.
 
 ### Steps Included:
 1. Create and activate a conda environment:
