@@ -1,38 +1,19 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: python source/create_features_w_params.py
+    cmd: python source/preprocessing.py
     deps:
-    - path: data/adult.data
+    - path: data/student_mental_health.csv
       hash: md5
-      md5: 5d7c39d7b8804f071cdd1f2a7c460872
-      size: 3974305
+      md5: 6f36323cf7271478bde6343e8b912c43
+      size: 7339
       isexec: true
-    - path: data/adult.test
+    - path: source/preprocessing.py
       hash: md5
-      md5: 366c746021dc50ad9d933d2817612fc9
-      size: 2003132
-      isexec: true
-    - path: source/create_features.py
-      hash: md5
-      md5: b93aea27ba45f8b24bdd52928f1f2b99
-      size: 2564
-      isexec: true
-    params:
-      params.yaml:
-        features.chi2percentile: 50
-        features.test_path: data/adult.test
-        features.train_path: data/adult.data
+      md5: 4241a9c429ddf88b1d3486997ded48d6
+      size: 732
     outs:
-    - path: data/pipeline.pkl
+    - path: data/cleaned_health_data.csv
       hash: md5
-      md5: 02fa1a17849af69fffc48ccf30e44212
-      size: 6104
-    - path: data/processed_test_data.csv
-      hash: md5
-      md5: a59c8daac38fe1ca84dda2b458ee762a
-      size: 5409602
-    - path: data/processed_train_data.csv
-      hash: md5
-      md5: adf63b6ce20f7ee74f63d5dabb325226
-      size: 10829967
+      md5: 949e7aa3b6f6cf9c374798d45df72075
+      size: 5751
