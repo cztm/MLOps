@@ -1,0 +1,6 @@
+outs:
+- md5: 6f36323cf7271478bde6343e8b912c43
+  size: 7339
+  isexec: true
+  hash: md5
+  path: student_mental_health.csv
