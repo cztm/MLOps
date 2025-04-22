@@ -1,0 +1,7 @@
+/config.local
+/tmp
+/cache
+.metaflow/
+*.json
+*.key
+*.env

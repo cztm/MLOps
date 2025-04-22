@@ -1,0 +1,1 @@
+postgresql://cztm:MsdsClasswork@34.94.1.95/mlops

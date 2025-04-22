@@ -1,0 +1,44 @@
+info: --instance: mlflow-fineprint, --database: fineprint, --project: fineprint-457018, --artifact repo: fineprint-repo, --service acct: fineprintbyPCAVE, --ip address: 34.102.57.99, --username:cfineprint, --password:PCAVE
+gcloud sql instances create mlflow-fineprint --database-version=POSTGRES_15 --region=us-west2 --tier=db-f1-micro --storage-type=HDD --storage-size=10GB --authorized-networks=0.0.0.0/0
+gcloud sql users create cfineprint --instance=mlflow-fineprint --password=PCAVE
+gcloud sql databases create fineprint --instance=mlflow-fineprint
+gcloud artifacts repositories create fineprint-repo --location=us-west2 --repository-format=docker
+gcloud iam service-accounts create fineprintbyPCAVE
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/cloudsql.editor" 
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/storage.objectAdmin"
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" 
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/artifactregistry.admin" 
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/clouddeploy.serviceAgent" 
+gcloud projects add-iam-policy-binding fineprint-457018 --member="serviceAccount:fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com" --role="roles/cloudfunctions.admin"
+gcloud iam service-accounts keys create sa-private-key.json --iam-account=fineprintbyPCAVE@fineprint-457018.iam.gserviceaccount.com
+gcloud secrets create access_keys --data-file=sa-private-key.json
+gcloud sql instances describe mlflow-fineprint
+gcloud secrets create database_url
+echo "postgresql://cfineprint:PCAVE@34.102.57.99/fineprint" > db_clean.txt
+gcloud secrets versions add database_url --data-file=db_clean.txt
+gcloud secrets create bucket_url
+echo "gs://fineprint-training/mlruns" > bucket_url.txt
+gcloud secrets versions add bucket_url --data-file=bucket_url.txt
+echo -e "setuptools\nmlflow==2.15.1\npsycopg2-binary==2.9.9\ngoogle-cloud-storage==2.18.2" > requirements.txt
+echo -e "FROM python:3.12-slim\n\nWORKDIR /\n\nCOPY requirements.txt requirements.txt\nCOPY server.sh server.sh\n\nENV GOOGLE_APPLICATION_CREDENTIALS='./secrets/credentials'\n\nRUN pip install --upgrade pip && pip install -r requirements.txt\n\nEXPOSE 8080\n\nRUN chmod +x server.sh\n\nENTRYPOINT [\"./server.sh\"]" > Dockerfile
+touch server.sh
+vim server.sh
+full file info (copy what's in the quotes, not the quotes themselves): "
+#!/bin/bash
+
+echo "🔥 POSTGRESQL_URL = $POSTGRESQL_URL"
+echo "🔥 STORAGE_URL = $STORAGE_URL"
+
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+  echo "⚙️ Running database migrations..."
+  mlflow db upgrade "$POSTGRESQL_URL"
+else
+  echo "⏩ Skipping database migrations"
+fi
+
+mlflow server --host 0.0.0.0 --port 8080 --backend-store-uri "$POSTGRESQL_URL" --default-artifact-root "$STORAGE_URL"
+"
+gcloud auth configure-docker us-west2-docker.pkg.dev
+docker build --platform linux/amd64 -t "us-west2-docker.pkg.dev/fineprint-457018/fineprint-repo/mlflow:v1" .
+docker push "us-west2-docker.pkg.dev/fineprint-457018/fineprint-repo/mlflow:v1"
+gcloud builds submit --tag us-west2-docker.pkg.dev/fineprint-457018/fineprint-repo/mlflow:v1
