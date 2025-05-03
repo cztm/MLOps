@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reddit-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reddit
+  template:
+    metadata:
+      labels:
+        app: reddit
+    spec:
+      containers:
+        - name: reddit
+          image: gcr.io/mlopsl9/reddit_lab:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health  # Define a health check endpoint in your FastAPI app
+          #     port: 5000
+          #   initialDelaySeconds: 5  # Wait 5 seconds after startup before probing
+          #   periodSeconds: 10     # Check every 10 seconds
+          #   timeoutSeconds: 2      # Wait up to 2 seconds for a response
+          #   failureThreshold: 3   # Mark unhealthy after 3 consecutive failures
+
+  # Ensure this matches the EXPOSE and uvicorn port
+      # Remove the 'command' section entirely
